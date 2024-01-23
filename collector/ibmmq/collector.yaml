@@ -12,11 +12,12 @@ receivers:
 exporters:
   logging:
     loglevel: debug
-  otlp:
-    endpoint: ingest.lightstep.com:443
-    headers:
-      - lightstep-access-token: "${LS_ACCESS_TOKEN}"
-
+  otlphttp:
+     metrics_endpoint: "https://ingest.${SPLUNK_REALM}.signalfx.com/v2/datapoint/otlp"
+     traces_endpoint: "https://ingest.${SPLUNK_REALM}.signalfx.com/v2/trace/otlp"
+     compression: gzip
+     headers:
+       "X-SF-Token": "${SPLUNK_ACCESS_TOKEN}"
 service:
   pipelines:
     metrics:

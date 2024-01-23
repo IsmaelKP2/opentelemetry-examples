@@ -12,21 +12,45 @@ services:
       - MQ_ENABLE_METRICS=true
     volumes:
       - ./mqs.ini:/var/mqm/mqm
+      - mqtracingexit.conf:/var/mqm/exits64
     ports:
       - 9157
     networks:
       - integrations
-  otel-collector:
-      container_name: otel-collect
-      hostname: otel-collector
-      image: otel/opentelemetry-collector-contrib:0.77.0
-      command: ["--config=/conf/collector.yaml"]
-      environment:
-        LS_ACCESS_TOKEN: ${LS_ACCESS_TOKEN}
-      networks:
-          - integrations
-      volumes:
-          - ./collector.yaml:/conf/collector.yaml:rw
+  splunk-otel-collector:
+    container_name: otel-collect
+    hostname: otel-collector
+    image: quay.io/signalfx/splunk-otel-collector:0.92.0
+    command: ["--config=/conf/collector.yaml"]
+    environment:
+      - SPLUNK_ACCESS_TOKEN=${SPLUNK_ACCESS_TOKEN}
+      - SPLUNK_REALM=${SPLUNK_REALM}
+    ports:
+      - "13133:13133"
+      - "14250:14250"
+      - "14268:14268"
+      - "4317:4317"
+      - "6060:6060"
+      - "8888:8888"
+      - "9080:9080"
+      - "9411:9411"
+      - "9943:9943"
+    networks:
+      - integrations
+    volumes:
+      - ./collector.yaml:/conf/collector.yaml:rw
 networks:
   integrations:
     driver: bridge
+
+  # otel-collector:
+  #     container_name: otel-collect
+  #     hostname: otel-collector
+  #     image: otel/opentelemetry-collector-contrib:0.77.0
+  #     command: ["--config=/conf/collector.yaml"]
+  #     environment:
+  #       LS_ACCESS_TOKEN: ${LS_ACCESS_TOKEN}
+  #     networks:
+  #         - integrations
+  #     volumes:
+  #         - ./collector.yaml:/conf/collector.yaml:rw

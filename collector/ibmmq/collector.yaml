@@ -1,4 +1,13 @@
 receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: "splunk-otel-collector:4317"
+      http:
+        endpoint: "splunk-otel-collector:4318"
+    tls:
+      insecure: true
+
   prometheus/ibmmq:
     use_start_time_metric: false
     start_time_metric_regex: '^(.+_)*process_start_time_seconds$'
@@ -18,8 +27,14 @@ exporters:
      compression: gzip
      headers:
        "X-SF-Token": "${SPLUNK_ACCESS_TOKEN}"
+
+
+
 service:
   pipelines:
     metrics:
       receivers: [prometheus/ibmmq]
+      exporters: [logging, otlphttp]
+    traces:
+      receivers: [jaeger]
       exporters: [logging, otlphttp]
